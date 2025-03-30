@@ -3,6 +3,11 @@ import kvIncrementalCache from "@opennextjs/cloudflare/kv-cache";
 import d1TagCache from "@opennextjs/cloudflare/d1-tag-cache";
 import memoryQueue from "@opennextjs/cloudflare/memory-queue";
 
+// version o.6.x
+// import kvIncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/kv-incremental-cache";
+// import d1TagCache from "@opennextjs/cloudflare/overrides/tag-cache/d1-tag-cache";
+// import memoryQueue from "@opennextjs/cloudflare/overrides/queue/memory-queue";
+
 export default defineCloudflareConfig({
   incrementalCache: kvIncrementalCache,
   tagCache: d1TagCache,
