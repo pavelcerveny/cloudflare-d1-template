@@ -2,8 +2,6 @@
 
 This is a template for a SaaS application using Cloudflare Workers and D1. It uses the [OpenNext](https://opennext.js.org/cloudflare) framework to build a SaaS application.
 
-Have a look at the [project plan](./cursor-docs/project-plan.md) to get an overview of the project.
-
 Fork (with some changes) of this excelent template: [Cloudflare Workers SaaS Template](https://github.com/LubomirGeorgiev/cloudflare-workers-nextjs-saas-template)
 
 # Features
