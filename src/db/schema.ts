@@ -67,7 +67,7 @@ export const sessions = sqliteTable("session", {
 })
  
 export const verificationTokens = sqliteTable(
-  "verificationToken",
+  "verification_token",
   {
     identifier: text("identifier").notNull(),
     token: text("token").notNull(),

@@ -2,7 +2,6 @@
 
 import { signInAction } from "./sign-in.actions";
 import { type SignInSchema, signInSchema } from "@/schemas/signin.schema";
-import { type ReactNode, useState } from "react";
 
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -32,10 +31,13 @@ const SignInPage = () => {
 
   const form = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema),
+    defaultValues: {
+      flow: "login"
+    }
   });
+  console.log(form.formState.errors, form.getValues())
 
   const onSubmit = async (data: SignInSchema) => {
-    console.log(data)
     signIn(data)
   }
 
@@ -60,7 +62,7 @@ const SignInPage = () => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
-            <input type="hidden" name="flow" value="signup" />
+            <input type="hidden" {...form.register("flow")} />
             <FormField
               control={form.control}
               name="email"

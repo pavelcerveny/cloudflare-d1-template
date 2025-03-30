@@ -4,10 +4,11 @@ import { getDB } from "@/db"
 import Credentials from "next-auth/providers/credentials"
 import { hashPassword, verifyPassword } from "./utils/password-hasher";
 import { SignInSchema } from "./schemas/signin.schema";
-import { sessions, users } from "./db/schema";
+import { accounts, sessions, users, verificationTokens } from "./db/schema";
 import { eq } from 'drizzle-orm';
 import { canSignUp, generateSessionToken } from "./utils/auth";
 import { getIP } from "./utils/get-IP";
+import Nodemailer from "next-auth/providers/nodemailer";
 
 const authResult = async () => {
     return NextAuth({
@@ -56,7 +57,6 @@ const authResult = async () => {
               await canSignUp({ email });
 
               const hashedPassword = await hashPassword({ password });
-              console.log(hashedPassword)
 
               // Create the user
               const [createdUser] = await db.insert(users)
@@ -80,8 +80,17 @@ const authResult = async () => {
             return returnUserData;
           },
         }),
+        Nodemailer({
+          server: process.env.EMAIL_SERVER,
+          from: process.env.EMAIL_FROM,
+        }),
       ],
-      adapter: DrizzleAdapter(await getDB()),
+      adapter: DrizzleAdapter(await getDB(), {
+        usersTable: users,
+        accountsTable: accounts,
+        sessionsTable: sessions,
+        verificationTokensTable: verificationTokens,
+      }),
       callbacks: {
         async jwt({ token, user, account }) {
           if (account?.provider === "credentials") {
