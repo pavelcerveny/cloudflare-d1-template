@@ -9,6 +9,9 @@ import { eq } from 'drizzle-orm';
 import { canSignUp, generateSessionToken } from "./utils/auth";
 import { getIP } from "./utils/get-IP";
 import Nodemailer from "next-auth/providers/nodemailer";
+import { sendVerificationEmail } from "./utils/email";
+import { createId } from "@paralleldrive/cuid2";
+import { EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS } from "./constants";
 
 const authResult = async () => {
     return NextAuth({
@@ -70,6 +73,22 @@ const authResult = async () => {
                 if (!createdUser || !createdUser.email) {
                   throw new Error("Failed to register user.");
                 }
+
+                const verificationToken = createId();
+                const expiresAt = new Date(Date.now() + EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS * 1000);
+
+                await db.insert(verificationTokens)
+                  .values({
+                    identifier: createId(),
+                    token: verificationToken,
+                    expires: expiresAt,
+                  });
+
+                await sendVerificationEmail({
+                  email: createdUser.email,
+                  verificationToken,
+                  username: createdUser.name || createdUser.email
+                });
 
                 returnUserData = {
                   id: createdUser.id,

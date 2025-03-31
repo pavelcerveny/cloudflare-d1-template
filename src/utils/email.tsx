@@ -5,6 +5,7 @@ import { render } from '@react-email/render'
 import { ResetPasswordEmail } from "@/react-email/reset-password";
 import { VerifyEmail } from "@/react-email/verify-email";
 import isProd from "./is-prod";
+import nodemailer from 'nodemailer';
 
 interface BrevoEmailOptions {
   to: { email: string; name?: string }[];
@@ -27,7 +28,17 @@ interface ResendEmailOptions {
   tags?: { name: string; value: string }[];
 }
 
-type EmailProvider = "resend" | "brevo" | null;
+interface NodemailerEmailOptions {
+  to: { email: string; name?: string }[];
+  subject: string;
+  replyTo?: string;
+  htmlContent: string;
+  textContent?: string;
+  params?: Record<string, string>;
+  tags?: string[];
+}
+
+type EmailProvider = "resend" | "brevo" | "nodemailer" | null;
 
 async function getEmailProvider(): Promise<EmailProvider> {
   if (process.env.RESEND_API_KEY) {
@@ -36,6 +47,10 @@ async function getEmailProvider(): Promise<EmailProvider> {
 
   if (process.env.BREVO_API_KEY) {
     return "brevo";
+  }
+  
+  if (process.env.NODEMAILER_HOST && process.env.NODEMAILER_USER && process.env.NODEMAILER_PASS) {
+    return "nodemailer";
   }
 
   return null;
@@ -136,6 +151,66 @@ async function sendBrevoEmail({
   return response.json();
 }
 
+async function sendNodemailerEmail({
+  to,
+  subject,
+  replyTo: originalReplyTo,
+  htmlContent,
+  textContent,
+  params,
+  tags,
+}: NodemailerEmailOptions) {
+  if (!isProd) {
+    return;
+  }
+
+  if (!process.env.NODEMAILER_HOST || !process.env.NODEMAILER_USER || !process.env.NODEMAILER_PASS) {
+    throw new Error("Nodemailer configuration is not complete. Please check NODEMAILER_HOST, NODEMAILER_USER, and NODEMAILER_PASS environment variables.");
+  }
+
+  const replyTo = originalReplyTo ?? process.env.EMAIL_REPLY_TO;
+
+  // Create a transporter
+  const transporter = nodemailer.createTransport({
+    host: process.env.NODEMAILER_HOST,
+    port: process.env.NODEMAILER_PORT ? parseInt(process.env.NODEMAILER_PORT) : 587,
+    secure: process.env.NODEMAILER_SECURE === 'true',
+    auth: {
+      user: process.env.NODEMAILER_USER,
+      pass: process.env.NODEMAILER_PASS,
+    },
+  });
+
+  // Prepare recipients
+  const recipients = to.map(recipient => {
+    if (recipient.name) {
+      return `"${recipient.name}" <${recipient.email}>`;
+    }
+    return recipient.email;
+  });
+
+  // Build email options
+  const mailOptions = {
+    from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
+    to: recipients.join(', '),
+    subject,
+    html: htmlContent,
+    ...(textContent ? { text: textContent } : {}),
+    ...(replyTo ? { replyTo } : {}),
+  };
+
+  try {
+    // Send email
+    const info = await transporter.sendMail(mailOptions);
+    return {
+      id: info.messageId,
+      success: true,
+    };
+  } catch (error) {
+    throw new Error(`Failed to send email via Nodemailer: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
 export async function sendPasswordResetEmail({
   email,
   resetToken,
@@ -167,8 +242,15 @@ export async function sendPasswordResetEmail({
       html,
       tags: [{ name: "type", value: "password-reset" }],
     });
-  } else {
+  } else if (provider === "brevo") {
     await sendBrevoEmail({
+      to: [{ email, name: username }],
+      subject: `Reset your password for ${SITE_DOMAIN}`,
+      htmlContent: html,
+      tags: ["password-reset"],
+    });
+  } else if (provider === "nodemailer") {
+    await sendNodemailerEmail({
       to: [{ email, name: username }],
       subject: `Reset your password for ${SITE_DOMAIN}`,
       htmlContent: html,
@@ -208,8 +290,15 @@ export async function sendVerificationEmail({
       html,
       tags: [{ name: "type", value: "email-verification" }],
     });
-  } else {
+  } else if (provider === "brevo") {
     await sendBrevoEmail({
+      to: [{ email, name: username }],
+      subject: `Verify your email for ${SITE_DOMAIN}`,
+      htmlContent: html,
+      tags: ["email-verification"],
+    });
+  } else if (provider === "nodemailer") {
+    await sendNodemailerEmail({
       to: [{ email, name: username }],
       subject: `Verify your email for ${SITE_DOMAIN}`,
       htmlContent: html,

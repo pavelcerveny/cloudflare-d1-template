@@ -35,7 +35,6 @@ const SignInPage = () => {
       flow: "login"
     }
   });
-  console.log(form.formState.errors, form.getValues())
 
   const onSubmit = async (data: SignInSchema) => {
     signIn(data)
