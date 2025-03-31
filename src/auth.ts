@@ -51,7 +51,7 @@ const authResult = async () => {
               }
             } else {
               if (user) {
-                throw new Error("Invalid credentials. - user exists");
+                throw new Error("Invalid credentials.");
               }
 
               await canSignUp({ email });

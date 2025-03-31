@@ -1,0 +1,29 @@
+# General Code Style & Formatting
+- Follow the Airbnb Style Guide for code formatting.
+- Use PascalCase for React component file names (e.g., UserCard.tsx, not user-card.tsx).
+- Prefer named exports for components.
+- Use TypeScript for all code; prefer interfaces over types.
+- Avoid enums; use maps instead.
+- Use functional components with TypeScript interfaces.
+
+# Project Structure & Architecture
+- Follow Next.js patterns and use the App Router.
+- Correctly determine when to use server vs. client components in Next.js.
+- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+
+# Styling & UI
+- Use Tailwind CSS for styling.
+- Use Shadcn UI for components.
+- Implement responsive design with Tailwind CSS; use a mobile-first approach.
+- Optimize for light and dark mode.
+
+# Data Fetching & Forms
+- Use TanStack Query (react-query) for frontend data fetching.
+- Use React Hook Form for form handling.
+- Use Zod for validation.
+
+# State Management & Logic
+- Use React Context for state management.
+
+# Backend & Database
+Use Drizzle ORM for database access. Do not suggest using transactional database access. Using transactional database access is not supported by Cloudflare D1.
