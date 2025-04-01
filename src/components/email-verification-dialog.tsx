@@ -13,11 +13,12 @@ import { useServerAction } from "zsa-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS } from "@/constants";
-import { Alert } from "@heroui/react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import isProd from "@/utils/is-prod";
 import { usePathname } from "next/navigation";
 import { Route } from "next";
 import { resendVerificationAction } from "@/actions/resend-verification.action";
+import { AlertCircle } from "lucide-react";
 
 const pagesToBypass: Route[] = [
   "/verify-email",
@@ -77,12 +78,13 @@ export function EmailVerificationDialog() {
             The verification link will expire in {Math.floor(EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS / 3600)} hours.
 
             {!isProd && (
-              <Alert
-                color="warning"
-                title="Development mode"
-                description="You can find the verification link in the console."
-                className="mt-4 mb-2"
-              />
+              <Alert variant="warning">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Development mode</AlertTitle>
+                <AlertDescription>
+                You can find the verification link in the console.
+                </AlertDescription>
+              </Alert>
             )}
           </DialogDescription>
         </DialogHeader>

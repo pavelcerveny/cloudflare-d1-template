@@ -10,6 +10,7 @@ import NextTopLoader from 'nextjs-toploader'
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/constants";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { SessionProvider } from "next-auth/react";
+import { QueryProvider } from "@/lib/query";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -59,25 +60,27 @@ export default function BaseLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <SessionProvider>
-          <NextTopLoader
-            initialPosition={0.15}
-            shadow="0 0 10px #000, 0 0 5px #000"
-            height={4}
-          />
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-          >
-            <TooltipProvider
-              delayDuration={100}
-              skipDelayDuration={50}
+          <QueryProvider>
+            <NextTopLoader
+              initialPosition={0.15}
+              shadow="0 0 10px #000, 0 0 5px #000"
+              height={4}
+            />
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
             >
-              {children}
-            </TooltipProvider>
-          </ThemeProvider>
-          <Toaster richColors closeButton position="top-right" expand duration={7000} />
-          <CookieConsentBanner />
+              <TooltipProvider
+                delayDuration={100}
+                skipDelayDuration={50}
+              >
+                {children}
+              </TooltipProvider>
+            </ThemeProvider>
+            <Toaster richColors closeButton position="top-right" expand duration={7000} />
+            <CookieConsentBanner />
+          </QueryProvider>
         </SessionProvider>
         </body>
     </html>

@@ -1,13 +1,5 @@
-import {
-  CloudIcon,
-  BoltIcon,
-  ShieldCheckIcon,
-  RocketLaunchIcon,
-  EnvelopeIcon,
-  CommandLineIcon,
-  SunIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/outline";
+import { BoltIcon, CloudIcon, MailIcon, RocketIcon, ShieldCheckIcon, SunIcon, TerminalIcon, UsersIcon } from "lucide-react";
+
 
 const features = [
   {
@@ -20,7 +12,7 @@ const features = [
     name: "Database & Email",
     description:
       "Drizzle ORM with Cloudflare D1 for the database, and React Email with Resend for beautiful email templates.",
-    icon: EnvelopeIcon,
+    icon: MailIcon,
   },
   {
     name: "Modern Stack",
@@ -44,19 +36,19 @@ const features = [
     name: "Developer Experience",
     description:
       "GitHub Actions for deployment, comprehensive documentation, and TypeScript for type safety.",
-    icon: CommandLineIcon,
+    icon: TerminalIcon,
   },
   {
     name: "Form Handling",
     description:
       "Built-in form validation with Zod and React Hook Form for a smooth user experience.",
-    icon: RocketLaunchIcon,
+    icon: RocketIcon,
   },
   {
     name: "Team Ready",
     description:
       "Built with collaboration in mind. Easy to customize and extend with your team's requirements.",
-    icon: UserGroupIcon,
+    icon: UsersIcon,
   },
 ];
 

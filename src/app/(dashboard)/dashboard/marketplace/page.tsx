@@ -1,9 +1,10 @@
 import { PageHeader } from "@/components/page-header"
-import { Alert } from "@heroui/react"
 import { COMPONENTS } from "./components-catalog"
 import { MarketplaceCard } from "@/components/marketplace-card"
 import { getSessionFromCookie } from "@/utils/auth"
 import { getUserPurchasedItems } from "@/utils/credits"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 export default async function MarketplacePage() {
   const session = await getSessionFromCookie();
@@ -27,12 +28,13 @@ export default async function MarketplacePage() {
           </p>
         </div>
 
-        <Alert
-          color="warning"
-          title="Demo Template Feature"
-          description="This marketplace page demonstrates how to implement a credit-based billing system in your SaaS application. Feel free to use this as a starting point and customize it for your specific needs."
-          className="mb-6"
-        />
+        <Alert variant="warning">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Demo Template Feature</AlertTitle>
+          <AlertDescription>
+          This marketplace page demonstrates how to implement a credit-based billing system in your SaaS application. Feel free to use this as a starting point and customize it for your specific needs.
+          </AlertDescription>
+        </Alert>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {COMPONENTS.map((component) => (

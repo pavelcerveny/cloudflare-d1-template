@@ -8,7 +8,6 @@ import { accounts, sessions, users, verificationTokens } from "./db/schema";
 import { eq } from 'drizzle-orm';
 import { canSignUp, generateSessionToken } from "./utils/auth";
 import { getIP } from "./utils/get-IP";
-import Nodemailer from "next-auth/providers/nodemailer";
 import { sendVerificationEmail } from "./utils/email";
 import { createId } from "@paralleldrive/cuid2";
 import { EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS } from "./constants";
@@ -98,10 +97,6 @@ const authResult = async () => {
 
             return returnUserData;
           },
-        }),
-        Nodemailer({
-          server: process.env.EMAIL_SERVER,
-          from: process.env.EMAIL_FROM,
         }),
       ],
       adapter: DrizzleAdapter(await getDB(), {

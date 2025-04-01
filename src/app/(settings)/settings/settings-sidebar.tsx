@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ScrollShadow } from '@heroui/react'
 import {
   User,
   Smartphone,
@@ -25,6 +24,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { useRef } from "react";
 import type { Route } from "next";
 import useSignOut from "@/hooks/useSignOut";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { ScrollBar } from "@/components/ui/scroll-area";
 
 interface SidebarNavItem {
   title: string;
@@ -62,10 +63,8 @@ export function SettingsSidebar() {
   const { signOut } = useSignOut();
 
   return (
-    <ScrollShadow
+    <ScrollArea
       className="w-full lg:w-auto whitespace-nowrap pb-2"
-      orientation="horizontal"
-      isEnabled={isLgAndSmaller}
     >
       <nav className="flex items-center lg:items-stretch min-w-full space-x-2 pb-2 lg:pb-0 lg:flex-col lg:space-x-0 lg:space-y-1">
         {sidebarNavItems.map((item) => (
@@ -121,6 +120,7 @@ export function SettingsSidebar() {
           </DialogContent>
         </Dialog>
       </nav>
-    </ScrollShadow>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   );
 }
