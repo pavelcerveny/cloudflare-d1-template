@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { catchaSchema } from "./catcha.schema";
+import { catchaSchema } from "./captcha.schema";
 
 export const signUpSchema = z.object({
   email: z.string().email(),
