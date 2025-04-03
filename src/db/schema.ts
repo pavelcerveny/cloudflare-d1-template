@@ -23,6 +23,7 @@ const commonColumns = {
 
 export const users = sqliteTable("user", {
   ...commonColumns,
+  name: text("name"),
   firstName: text("firstName"),
   lastName: text("lastName"),
   email: text("email").unique(),

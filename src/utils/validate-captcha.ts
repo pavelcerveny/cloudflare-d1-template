@@ -1,4 +1,4 @@
-import { env } from "@/env/server"
+import { env } from "@/env.mjs"
 import { CAPTCHA_ENABLED } from "@/featureFlags"
 
 interface TurnstileResponse {
@@ -6,7 +6,7 @@ interface TurnstileResponse {
   'error-codes'?: string[]
 }
 
-export async function validateTurnstileToken(token: string) {
+export async function validateCaptcha(token: string) {
   if (!CAPTCHA_ENABLED) {
     return true
   }

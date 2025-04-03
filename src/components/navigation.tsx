@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { useNavStore } from "@/state/nav"
-import { Skeleton } from "@/components/ui/skeleton"
 import { SITE_NAME } from "@/constants"
 import { useSession } from 'next-auth/react';
 

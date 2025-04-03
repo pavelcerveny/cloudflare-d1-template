@@ -16,11 +16,18 @@ import { useServerAction } from "zsa-react";
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
 import { REDIRECT_AFTER_SIGN_IN, SIGNIN_ERROR_URL } from "@/constants";
-import { providerMap, signIn } from "@/auth";
+import { signIn } from "next-auth/react"
 import { AuthError } from "next-auth";
 import { CAPTCHA_ENABLED } from "@/featureFlags";
 
-const SignUpPage = () => {
+interface SignUpPageProps {
+  providerMap: {
+    id: string;
+    name: string;
+}[]
+}
+
+const SignUpPage = ({providerMap}: SignUpPageProps) => {
   const router = useRouter();
 
   const { execute: signUp } = useServerAction(signUpAction, {
