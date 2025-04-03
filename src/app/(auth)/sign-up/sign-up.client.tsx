@@ -15,14 +15,13 @@ import { toast } from "sonner";
 import { useServerAction } from "zsa-react";
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
-import { useConfigStore } from "@/state/config";
 import { REDIRECT_AFTER_SIGN_IN, SIGNIN_ERROR_URL } from "@/constants";
 import { providerMap, signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { CAPTCHA_ENABLED } from "@/featureFlags";
 
 const SignUpPage = () => {
   const router = useRouter();
-  const { isTurnstileEnabled } = useConfigStore();
 
   const { execute: signUp } = useServerAction(signUpAction, {
     onError: (error) => {
@@ -182,7 +181,7 @@ const SignUpPage = () => {
               <Button
                 type="submit"
                 className="w-full flex justify-center py-2.5 mt-8"
-                disabled={Boolean(isTurnstileEnabled && !captchaToken)}
+                disabled={Boolean(CAPTCHA_ENABLED && !captchaToken)}
               >
                 Create Account with Password
               </Button>
