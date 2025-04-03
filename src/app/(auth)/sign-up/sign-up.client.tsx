@@ -16,11 +16,18 @@ import { useServerAction } from "zsa-react";
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
 import { REDIRECT_AFTER_SIGN_IN, SIGNIN_ERROR_URL } from "@/constants";
-import { providerMap, signIn } from "@/auth";
+import { signIn } from "next-auth/react"
 import { AuthError } from "next-auth";
 import { CAPTCHA_ENABLED } from "@/featureFlags";
 
-const SignUpPage = () => {
+interface SignUpPageProps {
+  providerMap: {
+    id: string;
+    name: string;
+}[]
+}
+
+const SignUpPage = ({providerMap}: SignUpPageProps) => {
   const router = useRouter();
 
   const { execute: signUp } = useServerAction(signUpAction, {
@@ -49,6 +56,27 @@ const SignUpPage = () => {
     signUp(data)
   }
 
+  const onSubmitProvider = async (providerId: string) => {
+    try {
+      await signIn(providerId, {
+        redirectTo: REDIRECT_AFTER_SIGN_IN,
+      })
+    } catch (error) {
+      // Signin can fail for a number of reasons, such as the user
+      // not existing, or the user not having the correct role.
+      // In some cases, you may want to redirect to a custom error
+      if (error instanceof AuthError) {
+        return redirect(`${SIGNIN_ERROR_URL}?error=${error.type}`)
+      }
+
+      // Otherwise if a redirects happens Next.js can handle it
+      // so you can just re-thrown the error and let Next.js handle it.
+      // Docs:
+      // https://nextjs.org/docs/app/api-reference/functions/redirect#server-component
+      throw error
+    }
+  }
+
   return (
     <div className="min-h-[90vh] flex items-center px-4 justify-center bg-background my-6 md:my-10">
       <div className="w-full max-w-md space-y-8 p-6 md:p-10 bg-card rounded-xl shadow-lg border border-border">
@@ -66,34 +94,14 @@ const SignUpPage = () => {
 
         <div className="space-y-4">
         {Object.values(providerMap).map((provider) => (
-        <form
-          action={async () => {
-            "use server"
-            try {
-              await signIn(provider.id, {
-                redirectTo: REDIRECT_AFTER_SIGN_IN,
-              })
-            } catch (error) {
-              // Signin can fail for a number of reasons, such as the user
-              // not existing, or the user not having the correct role.
-              // In some cases, you may want to redirect to a custom error
-              if (error instanceof AuthError) {
-                return redirect(`${SIGNIN_ERROR_URL}?error=${error.type}`)
-              }
- 
-              // Otherwise if a redirects happens Next.js can handle it
-              // so you can just re-thrown the error and let Next.js handle it.
-              // Docs:
-              // https://nextjs.org/docs/app/api-reference/functions/redirect#server-component
-              throw error
-            }
-          }}
-        >
-          <button type="submit">
-            <span>Sign in with {provider.name}</span>
-          </button>
-        </form>
-      ))}
+          <form
+            action={() => onSubmitProvider(provider.id)}
+          >
+            <button type="submit">
+              <span>Sign in with {provider.name}</span>
+            </button>
+          </form>
+        ))}
         </div>
 
         <SeparatorWithText>

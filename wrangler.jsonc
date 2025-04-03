@@ -61,7 +61,7 @@
     "d1_databases": [
         {
             "binding": "NEXT_CACHE_D1",
-            "database_name": "<d1-name>",
+            "database_name": "extract_db",
             "database_id": "<d1-id>",
             "migrations_dir": "src/db/migrations"
         }
