@@ -14,8 +14,9 @@ export const signInAction = createServerAction()
         try {
           await signIn("credentials", {
             ...input,
+            flow: "signin",
             redirect: false
-          })
+          });
 
           return { success: true };
         } catch (error) {

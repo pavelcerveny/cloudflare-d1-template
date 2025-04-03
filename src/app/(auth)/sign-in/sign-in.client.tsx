@@ -31,9 +31,6 @@ const SignInPage = () => {
 
   const form = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema),
-    defaultValues: {
-      flow: "login"
-    }
   });
 
   const onSubmit = async (data: SignInSchema) => {
@@ -61,7 +58,6 @@ const SignInPage = () => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
-            <input type="hidden" {...form.register("flow")} />
             <FormField
               control={form.control}
               name="email"

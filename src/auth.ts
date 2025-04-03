@@ -13,6 +13,9 @@ import { createId } from "@paralleldrive/cuid2";
 import { EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS } from "./constants";
 import type { Provider } from "next-auth/providers"
 
+interface SignInSchemaWithFlow extends SignInSchema {
+  flow: "signin" | "signup";
+}
 
 const providers: Provider[] = [
   Credentials({
@@ -22,7 +25,7 @@ const providers: Provider[] = [
     },
     authorize: async (data) => {
       let user = null
-      const {email, password, flow} = data as SignInSchema;
+      const {email, password, flow} = data as SignInSchemaWithFlow;
 
       const db = await getDB();
 
@@ -32,7 +35,7 @@ const providers: Provider[] = [
         where: eq(users.email, email)
       });
 
-      if (flow === 'login') {
+      if (flow === 'signin') {
 
         if (!user) {
           throw new Error("Invalid credentials.");
