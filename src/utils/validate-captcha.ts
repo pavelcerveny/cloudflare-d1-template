@@ -1,4 +1,5 @@
-import { isTurnstileEnabled } from "@/flags"
+import { env } from "@/env/server"
+import { CAPTCHA_ENABLED } from "@/featureFlags"
 
 interface TurnstileResponse {
   success: boolean
@@ -6,7 +7,7 @@ interface TurnstileResponse {
 }
 
 export async function validateTurnstileToken(token: string) {
-  if (!(await isTurnstileEnabled())) {
+  if (!CAPTCHA_ENABLED) {
     return true
   }
 
@@ -18,7 +19,7 @@ export async function validateTurnstileToken(token: string) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        secret: process.env.TURNSTILE_SECRET_KEY,
+        secret: env.TURNSTILE_SECRET_KEY,
         response: token,
       }),
     }

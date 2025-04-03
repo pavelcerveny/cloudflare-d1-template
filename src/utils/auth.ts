@@ -1,4 +1,3 @@
-import "server-only";
 
 import { users } from "@/db/schema";
 import { init } from "@paralleldrive/cuid2";
@@ -7,7 +6,6 @@ import { sha256 } from "@oslojs/crypto/sha2"
 import ms from "ms"
 import { getDB } from "@/db";
 import { eq } from "drizzle-orm";
-import { cookies } from "next/headers";
 import isProd from "@/utils/is-prod";
 import {
   createKVSession,
@@ -168,39 +166,39 @@ interface SetSessionTokenCookieParams {
 }
 
 export async function setSessionTokenCookie({ token, userId, expiresAt }: SetSessionTokenCookieParams): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE_NAME, encodeSessionCookie(userId, token), {
-    httpOnly: true,
-    sameSite: isProd ? "strict" : "lax",
-    secure: isProd,
-    expires: expiresAt,
-    path: "/",
-  });
+  // const cookieStore = await cookies();
+  // cookieStore.set(SESSION_COOKIE_NAME, encodeSessionCookie(userId, token), {
+  //   httpOnly: true,
+  //   sameSite: isProd ? "strict" : "lax",
+  //   secure: isProd,
+  //   expires: expiresAt,
+  //   path: "/",
+  // });
 }
 
 export async function deleteSessionTokenCookie(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE_NAME);
+  // const cookieStore = await cookies();
+  // cookieStore.delete(SESSION_COOKIE_NAME);
 }
 
 /**
  * This function can only be called in a Server Components, Server Action or Route Handler
  */
 export const getSessionFromCookie = cache(async (): Promise<SessionValidationResult | null> => {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  // const cookieStore = await cookies();
+  // const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
-  if (!sessionCookie) {
-    return null;
-  }
+  // if (!sessionCookie) {
+  //   return null;
+  // }
 
-  const decoded = decodeSessionCookie(sessionCookie);
+  // const decoded = decodeSessionCookie(sessionCookie);
 
-  if (!decoded || !decoded.token || !decoded.userId) {
-    return null;
-  }
+  // if (!decoded || !decoded.token || !decoded.userId) {
+  //   return null;
+  // }
 
-  return validateSessionToken(decoded.token, decoded.userId);
+  // return validateSessionToken(decoded.token, decoded.userId);
 })
 
 /**
