@@ -23,7 +23,8 @@ const commonColumns = {
 
 export const users = sqliteTable("user", {
   ...commonColumns,
-  name: text("name"),
+  firstName: text("firstName"),
+  lastName: text("lastName"),
   email: text("email").unique(),
   emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
   image: text("image"),
