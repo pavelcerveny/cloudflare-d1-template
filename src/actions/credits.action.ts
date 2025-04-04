@@ -12,6 +12,7 @@ import { getStripe } from "@/lib/stripe";
 import { MAX_TRANSACTIONS_PER_PAGE, CREDITS_EXPIRATION_YEARS } from "@/constants";
 import ms from "ms";
 import { withRateLimit, RATE_LIMITS } from "@/utils/with-rate-limit";
+import { YEAR_IN_MILLISECONDS } from "@/time-constants";
 
 // Action types
 type GetTransactionsInput = {
@@ -132,7 +133,7 @@ export async function confirmPayment({ packageId, paymentIntentId }: PurchaseCre
         creditPackage.credits,
         `Purchased ${creditPackage.credits} credits`,
         CREDIT_TRANSACTION_TYPE.PURCHASE,
-        new Date(Date.now() + ms(`${CREDITS_EXPIRATION_YEARS} years`))
+        new Date(Date.now() + (CREDITS_EXPIRATION_YEARS * YEAR_IN_MILLISECONDS))
       );
 
       return { success: true };

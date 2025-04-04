@@ -1,60 +1,57 @@
 "use server";
 
 import { createServerAction, ZSAError } from "zsa";
-import { getSessionFromCookie } from "@/utils/auth";
 import { createId } from "@paralleldrive/cuid2";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { getVerificationTokenKey } from "@/utils/auth-utils";
 import { sendVerificationEmail } from "@/utils/email";
 import { withRateLimit, RATE_LIMITS } from "@/utils/with-rate-limit";
 import { EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS } from "@/constants";
 import { z } from "zod";
+import { auth } from "@/auth";
+import { getDB } from "@/db";
+import { eq } from "drizzle-orm";
+import { users, verificationTokens } from "@/db/schema";
 
 export const resendVerificationAction = createServerAction()
   .input(z.void())
   .handler(async () => {
     return withRateLimit(
       async () => {
-        const session = await getSessionFromCookie();
+       const session = await auth();
 
-        if (!session) {
+        if (!session?.user) {
           throw new ZSAError(
-            "NOT_AUTHORIZED",
+            "NOT_AUTHORIZED", 
             "Not authenticated"
           );
         }
 
-        if (session?.user?.emailVerified) {
+        const db = await getDB();
+
+        const user = await db.query.users.findFirst({
+          where: eq(users.email, session.user.email!)
+        });
+
+        if (user?.emailVerified) {
           throw new ZSAError(
             "PRECONDITION_FAILED",
             "Email is already verified"
           );
         }
 
-        const { env } = getCloudflareContext();
-
-        // Generate verification token
-        const verificationToken = createId();
+        const verificationToken = crypto.randomUUID();
         const expiresAt = new Date(Date.now() + EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS * 1000);
-
-        // Save verification token in KV with expiration
-        await env.NEXT_CACHE_WORKERS_KV.put(
-          getVerificationTokenKey(verificationToken),
-          JSON.stringify({
-            userId: session.user.id,
-            expiresAt: expiresAt.toISOString(),
-          }),
-          {
-            expirationTtl: Math.floor((expiresAt.getTime() - Date.now()) / 1000),
-          }
-        );
-
-        // Send verification email
+  
+        await db.insert(verificationTokens)
+          .values({
+            identifier: crypto.randomUUID(),
+            token: verificationToken,
+            expires: expiresAt,
+          });
+  
         await sendVerificationEmail({
           email: session.user.email!,
           verificationToken,
-          // username: session.user.firstName || session.user.email!,
-          username: session.user.email!,
+          username: session.user.name || session.user.email!
         });
 
         return { success: true };

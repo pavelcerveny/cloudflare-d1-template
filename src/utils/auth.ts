@@ -18,12 +18,12 @@ import {
 } from "./kv-session";
 import { cache } from "react"
 import type { SessionValidationResult } from "@/types";
-import { SESSION_COOKIE_NAME } from "@/constants";
 import { ZSAError } from "zsa";
 import { addFreeMonthlyCreditsIfNeeded } from "./credits";
+import { DAY_IN_MILLISECONDS } from "@/time-constants";
 
 const getSessionLength = () => {
-  return ms("30d");
+  return 30 * DAY_IN_MILLISECONDS;
 }
 
 /**
