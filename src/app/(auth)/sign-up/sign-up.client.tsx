@@ -19,7 +19,6 @@ import { REDIRECT_AFTER_SIGN_IN, SIGNIN_ERROR_URL } from "@/constants";
 import { signIn } from "next-auth/react"
 import { AuthError } from "next-auth";
 import { CAPTCHA_ENABLED } from "@/featureFlags";
-import { resendVerificationAction } from "@/actions/resend-verification.action";
 
 interface SignUpPageProps {
   providerMap: {
@@ -45,22 +44,6 @@ const SignUpPage = ({providerMap}: SignUpPageProps) => {
       router.push(REDIRECT_AFTER_SIGN_IN)
     }
   });
-
-  const { execute: resendVerification } = useServerAction(resendVerificationAction, {
-    onError: (error) => {
-      toast.dismiss()
-      toast.error(error.err?.message)
-    },
-    onStart: () => {
-      toast.loading("Creating your account...")
-    },
-    onSuccess: () => {
-      toast.dismiss()
-      toast.success("Account created successfully")
-      router.push(REDIRECT_AFTER_SIGN_IN)
-    }
-  })
-
 
   const form = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
@@ -212,13 +195,6 @@ const SignUpPage = ({providerMap}: SignUpPageProps) => {
             </div>
           </form>
         </Form>
-
-        <Button
-          className="w-full flex justify-center py-2.5 mt-8"
-          onClick={() => resendVerification()}
-        >
-          Resend Verification Email
-        </Button>
 
         <div className="mt-6">
           <p className="text-xs text-center text-muted-foreground">

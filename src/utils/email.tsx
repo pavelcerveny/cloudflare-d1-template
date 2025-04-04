@@ -6,6 +6,7 @@ import { ResetPasswordEmail } from "@/react-email/reset-password";
 import { VerifyEmail } from "@/react-email/verify-email";
 import isProd from "./is-prod";
 import nodemailer from 'nodemailer';
+import { env } from "@/env.mjs";
 
 interface BrevoEmailOptions {
   to: { email: string; name?: string }[];
@@ -40,16 +41,16 @@ interface NodemailerEmailOptions {
 
 type EmailProvider = "resend" | "brevo" | "nodemailer" | null;
 
-async function getEmailProvider(): Promise<EmailProvider> {
-  if (process.env.RESEND_API_KEY) {
+function getEmailProvider(): EmailProvider {
+  if (env.RESEND_API_KEY) {
     return "resend";
   }
 
-  if (process.env.BREVO_API_KEY) {
+  if (env.BREVO_API_KEY) {
     return "brevo";
   }
-  
-  if (process.env.NODEMAILER_HOST && process.env.NODEMAILER_USER && process.env.NODEMAILER_PASS) {
+
+  if (env.NODEMAILER_HOST && env.NODEMAILER_USER && env.NODEMAILER_PASS) {
     return "nodemailer";
   }
 
@@ -69,16 +70,16 @@ async function sendResendEmail({
     return;
   }
 
-  if (!process.env.RESEND_API_KEY) {
+  if (!env.RESEND_API_KEY) {
     throw new Error("RESEND_API_KEY is not set");
   }
 
-  const replyTo = originalReplyTo ?? process.env.EMAIL_REPLY_TO;
+  const replyTo = originalReplyTo ?? env.EMAIL_REPLY_TO;
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+      "Authorization": `Bearer ${env.RESEND_API_KEY}`,
       "Content-Type": "application/json",
     } as const,
     body: JSON.stringify({
@@ -114,23 +115,23 @@ async function sendBrevoEmail({
     return;
   }
 
-  if (!process.env.BREVO_API_KEY) {
+  if (!env.BREVO_API_KEY) {
     throw new Error("BREVO_API_KEY is not set");
   }
 
-  const replyTo = originalReplyTo ?? process.env.EMAIL_REPLY_TO;
+  const replyTo = originalReplyTo ?? env.EMAIL_REPLY_TO;
 
   const response = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
       "accept": "application/json",
       "content-type": "application/json",
-      "api-key": process.env.BREVO_API_KEY,
+      "api-key": env.BREVO_API_KEY,
     } as const,
     body: JSON.stringify({
       sender: {
-        name: process.env.EMAIL_FROM_NAME,
-        email: process.env.EMAIL_FROM,
+        name: env.EMAIL_FROM_NAME,
+        email: env.EMAIL_FROM,
       },
       to,
       htmlContent,
@@ -164,20 +165,16 @@ async function sendNodemailerEmail({
     return;
   }
 
-  if (!process.env.NODEMAILER_HOST || !process.env.NODEMAILER_USER || !process.env.NODEMAILER_PASS) {
-    throw new Error("Nodemailer configuration is not complete. Please check NODEMAILER_HOST, NODEMAILER_USER, and NODEMAILER_PASS environment variables.");
-  }
-
-  const replyTo = originalReplyTo ?? process.env.EMAIL_REPLY_TO;
+  const replyTo = originalReplyTo ?? env.EMAIL_REPLY_TO;
 
   // Create a transporter
   const transporter = nodemailer.createTransport({
-    host: process.env.NODEMAILER_HOST,
-    port: process.env.NODEMAILER_PORT ? parseInt(process.env.NODEMAILER_PORT) : 587,
-    secure: process.env.NODEMAILER_SECURE === 'true',
+    host: env.NODEMAILER_HOST,
+    port: env.NODEMAILER_PORT ? parseInt(env.NODEMAILER_PORT) : 587,
+    secure: false,
     auth: {
-      user: process.env.NODEMAILER_USER,
-      pass: process.env.NODEMAILER_PASS,
+      user: env.NODEMAILER_USER,
+      pass: env.NODEMAILER_PASS,
     },
   });
 
@@ -191,7 +188,7 @@ async function sendNodemailerEmail({
 
   // Build email options
   const mailOptions = {
-    from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
+    from: `${env.EMAIL_FROM_NAME} <${env.EMAIL_FROM}>`,
     to: recipients.join(', '),
     subject,
     html: htmlContent,
@@ -270,16 +267,17 @@ export async function sendVerificationEmail({
 }) {
   const verificationUrl = `${SITE_URL}/verify-email?token=${verificationToken}`;
 
-  if (!isProd) {
-    console.warn('\n\n\nVerification url: ', verificationUrl)
+  // if (!isProd) {
+  //   console.warn('\n\n\nVerification url: ', verificationUrl)
 
-    return
-  }
+  //   return
+  // }
+
+  const provider = getEmailProvider();
 
   const html = await render(VerifyEmail({ verificationLink: verificationUrl, username }));
-  const provider = await getEmailProvider();
 
-  if (!provider && isProd) {
+  if (!provider) {
     throw new Error("No email provider configured. Set either RESEND_API_KEY or BREVO_API_KEY in your environment.");
   }
 

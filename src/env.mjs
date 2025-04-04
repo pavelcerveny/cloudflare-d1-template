@@ -18,6 +18,15 @@ export const env = createEnv({
 
     RESEND_API_KEY: z.string().optional(),
     BREVO_API_KEY: z.string().optional(),
+
+    NODEMAILER_HOST: z.string().optional(),
+    NODEMAILER_PORT: z.string().optional(),
+    NODEMAILER_USER: z.string().optional(),
+    NODEMAILER_PASS: z.string().optional(),
+
+    EMAIL_FROM: z.string().optional(),
+    EMAIL_FROM_NAME: z.string().optional(),
+    EMAIL_REPLY_TO: z.string().optional(),
   },
 
   client: {
@@ -35,6 +44,13 @@ export const env = createEnv({
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     BREVO_API_KEY: process.env.BREVO_API_KEY,
+    NODEMAILER_HOST: process.env.NODEMAILER_HOST,
+    NODEMAILER_PORT: process.env.NODEMAILER_PORT,
+    NODEMAILER_USER: process.env.NODEMAILER_USER,
+    NODEMAILER_PASS: process.env.NODEMAILER_PASS,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    EMAIL_FROM_NAME: process.env.EMAIL_FROM_NAME,
+    EMAIL_REPLY_TO: process.env.EMAIL_REPLY_TO,
   },
 
   emptyStringAsUndefined: true,

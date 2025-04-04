@@ -13,6 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useServerAction } from "zsa-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { REDIRECT_AFTER_SIGN_IN } from "@/constants";
 
 const SignInPage = () => {
   const { execute: signIn } = useServerAction(signInAction, {
@@ -27,14 +29,18 @@ const SignInPage = () => {
       toast.dismiss()
       toast.success("Signed in successfully")
     }
-  })
+  });
 
   const form = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema),
   });
 
   const onSubmit = async (data: SignInSchema) => {
-    signIn(data)
+    const [result] = await signIn(data);
+    
+    if (result?.success) {
+      redirect(REDIRECT_AFTER_SIGN_IN);
+    }
   }
 
   return (

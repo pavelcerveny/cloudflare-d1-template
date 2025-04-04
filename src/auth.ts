@@ -89,7 +89,7 @@ const providers: Provider[] = [
           await sendVerificationEmail({
             email: createdUser.email,
             verificationToken,
-            username: createdUser.name || createdUser.email
+            username: `${createdUser.firstName} ${createdUser.lastName}`
           });
 
           returnUserData = {

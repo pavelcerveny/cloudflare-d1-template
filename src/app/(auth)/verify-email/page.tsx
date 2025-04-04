@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 import { auth } from "@/auth";
 import Link from "next/link";
-import { REDIRECT_TO_LOGIN } from "@/constants";
-import { useRouter } from "next/router";
+import { REDIRECT_AFTER_SIGN_IN, REDIRECT_TO_LOGIN } from "@/constants";
 import { verifyEmailAction } from "./verify-email.action";
 import { User } from "@/db/schema";
 
@@ -11,10 +10,13 @@ export const metadata: Metadata = {
   description: "Verify your email address",
 };
 
-const VerifyEmailPage = async () => {
+const VerifyEmailPage = async ({
+  searchParams,
+}: {
+  searchParams: { token?: string };
+}) => {
   const session = await auth();
-  const { query } = useRouter();
-  const token = query.token as string;
+  const token = searchParams.token;
 
   if (!session?.user) {
     return (
@@ -22,6 +24,15 @@ const VerifyEmailPage = async () => {
         <h2>You are not logged in</h2>
         <p>Please log in to verify your email address</p>
         <Link href={REDIRECT_TO_LOGIN}>Log in</Link>
+      </div>
+    )
+  }
+
+  if (!token) {
+    return (
+      <div>
+        <h2>Missing verification token</h2>
+        <p>Please use the link from your email to verify your account</p>
       </div>
     )
   }
@@ -43,6 +54,7 @@ const VerifyEmailPage = async () => {
   return (
     <div>
       <h2>Email verified successfully</h2>
+      <Link href={REDIRECT_AFTER_SIGN_IN}>Go to dashboard</Link>
     </div>
   )
 }

@@ -7,6 +7,7 @@ import { verifyEmailSchema } from "@/schemas/verify-email.schema";
 import { getDB } from "@/db";
 import { users, verificationTokens } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { isBefore } from "date-fns";
 
 export const verifyEmailAction = createServerAction()
   .input(verifyEmailSchema)
@@ -40,7 +41,7 @@ export const verifyEmailAction = createServerAction()
             );
           }
 
-          if (verificationToken.expires.getMilliseconds() < Date.now()) {
+          if (isBefore(verificationToken.expires, new Date())) {
             throw new ZSAError(
               "INPUT_PARSE_ERROR",
               "Expired verification token"

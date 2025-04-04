@@ -3,13 +3,13 @@
 import Link from "next/link"
 import type { Route } from 'next'
 import { usePathname } from "next/navigation"
-import { ComponentIcon, Menu } from 'lucide-react'
+import { ComponentIcon, Menu, User } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { useNavStore } from "@/state/nav"
 import { SITE_NAME } from "@/constants"
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 
 type NavItem = {
   name: string;
@@ -83,6 +83,17 @@ export function Navigation() {
                 ))}
             </div>
             <ActionButtons />
+            {data?.user && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="p-6"
+                onClick={() => signOut()}
+              >
+                <User className="w-9 h-9" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            )}
           </div>
           <div className="md:hidden flex items-center">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>

@@ -1,15 +1,15 @@
 import { AppSidebar } from "@/components/app-sidebar"
-import { getSessionFromCookie } from "@/utils/auth"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import { redirect } from "next/navigation"
+import { auth } from "@/auth"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await getSessionFromCookie()
+  const session = await auth()
 
-  if (!session) {
+  if (!session?.user) {
     return redirect('/')
   }
 
