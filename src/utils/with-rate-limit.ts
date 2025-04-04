@@ -1,7 +1,6 @@
 import "server-only";
 import { checkRateLimit } from "./rate-limit";
 import { getIP } from "./get-IP";
-import ms from "ms";
 import isProd from "./is-prod";
 import { HOUR_IN_SECONDS, MINUTE_IN_SECONDS } from "@/time-constants";
 

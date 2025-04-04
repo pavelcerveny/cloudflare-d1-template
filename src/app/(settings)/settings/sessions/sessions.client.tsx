@@ -26,7 +26,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { SessionWithMeta } from "@/types";
-import { capitalize } from 'remeda'
+import { capitalize } from "@/utils/text";
 
 
 const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });

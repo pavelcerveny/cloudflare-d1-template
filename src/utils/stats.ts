@@ -3,6 +3,7 @@ import { getDB } from "@/db";
 import { users } from "@/db/schema";
 import { withKVCache } from "./with-kv-cache";
 import { GITHUB_REPO_URL } from "@/constants";
+import { HOUR_IN_SECONDS } from "@/time-constants";
 
 export async function getTotalUsers() {
   return withKVCache(
@@ -13,7 +14,7 @@ export async function getTotalUsers() {
     },
     {
       key: "stats:total-users",
-      ttl: "1 hour",
+      ttl: HOUR_IN_SECONDS,
     }
   );
 }
@@ -44,7 +45,7 @@ export async function getGithubStars() {
     },
     {
       key: "stats:github-stars",
-      ttl: "1 hour",
+      ttl: HOUR_IN_SECONDS,
     }
   );
 }

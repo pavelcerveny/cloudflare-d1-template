@@ -1,12 +1,11 @@
 import "server-only";
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import ms from "ms";
 import isProd from "./is-prod";
 
 interface CacheOptions {
   key: string;
-  ttl: string; // e.g., "1h", "5m", "1d"
+  ttl: number; // seconds
 }
 
 export async function withKVCache<T>(
@@ -32,7 +31,7 @@ export async function withKVCache<T>(
 
   // Cache the result with the specified TTL
   await kv.put(key, JSON.stringify(result), {
-    expirationTtl: Math.floor(ms(ttl) / 1000), // Convert ms to seconds for KV
+    expirationTtl: ttl,
   });
 
   return result;
