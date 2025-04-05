@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/app-sidebar"
+
 import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
@@ -7,6 +7,7 @@ import { auth } from "@/auth"
 
 import { cn } from "@/lib/utils"
 import SkipToMain from "@/components/skip-to-main"
+import { AppSidebar } from "@/components/admin/layout/app-sidebar"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()

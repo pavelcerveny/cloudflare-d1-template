@@ -2,11 +2,26 @@
 
 This is a template for a SaaS application using Cloudflare Workers and D1. It uses the [OpenNext](https://opennext.js.org/cloudflare) framework to build a SaaS application.
 
-Fork (with some changes) of this excelent template: [Cloudflare Workers SaaS Template](https://github.com/LubomirGeorgiev/cloudflare-workers-nextjs-saas-template)
+Huge inspiration from this excelent template: [Cloudflare Workers SaaS Template](https://github.com/LubomirGeorgiev/cloudflare-workers-nextjs-saas-template)
+Dashboard admin (with some changes) comming from this great project: [ShadCN Admin](https://github.com/satnaing/shadcn-admin)
 
 # Features
 
 - Auth.js
+- React Query (you might not need it)
+- Next.js 15
+- Zod
+- Env variables (with Zod)
+- Tailwind CSS 4
+- Shadcn UI
+- Drizzle ORM
+- Cloudflare Workers
+- D1
+- React Email
+- Resend
+- Brevo
+- Nodemailer
+- Lucide Icons
 
 # Running it locally
 
