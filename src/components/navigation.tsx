@@ -1,135 +1,97 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import type { Route } from 'next'
-import { usePathname } from "next/navigation"
-import { ComponentIcon, Menu, User } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { cn } from "@/lib/utils"
-import { useNavStore } from "@/state/nav"
-import { SITE_NAME } from "@/constants"
-import { signOut, useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { use, useState, Suspense } from 'react';
+import { Button } from '@/components/ui/button';
+import { CircleIcon, Home, LogOut } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
+import { Session } from 'next-auth';
 
-type NavItem = {
-  name: string;
-  href: Route;
-}
+function UserMenu({session}: {session: Session | null}) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const router = useRouter();
 
-const ActionButtons = () => {
-  const { data } = useSession()
-  const { setIsOpen } = useNavStore()
+  async function handleSignOut() {
+    await signOut();
+    router.refresh();
+    router.push('/');
+  }
 
-  if (data?.user) {
-    return null;
+  const user = session?.user;
+
+  if (!user) {
+    return (
+      <>
+        <Link
+          href="/pricing"
+          className="text-sm font-medium text-gray-700 hover:text-gray-900"
+        >
+          Pricing
+        </Link>
+        <Button asChild className="rounded-full">
+          <Link href="/sign-up">Sign Up</Link>
+        </Button>
+        <Button asChild className="rounded-full">
+          <Link href="/sign-in">Sign In</Link>
+        </Button>
+      </>
+    );
   }
 
   return (
-    <>
-      <Button asChild onClick={() => setIsOpen(false)}>
-        <Link href="/sign-in">Sign In</Link>
-      </Button>
-      <Button asChild onClick={() => setIsOpen(false)}>
-        <Link href="/sign-up">Sign Up</Link>
-      </Button>
-    </>
-    
-  )
+    <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+      <DropdownMenuTrigger>
+        <Avatar className="cursor-pointer size-9">
+          <AvatarImage alt={user.name || ''} />
+          <AvatarFallback>
+            {user?.email?.split(' ')
+              .map((n) => n[0])
+              .join('')}
+          </AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="flex flex-col gap-1">
+        <DropdownMenuItem className="cursor-pointer">
+          <Link href="/dashboard" className="flex w-full items-center">
+            <Home className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
+        </DropdownMenuItem>
+        <form action={handleSignOut} className="w-full">
+          <button type="submit" className="flex w-full">
+            <DropdownMenuItem className="w-full flex-1 cursor-pointer">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign out</span>
+            </DropdownMenuItem>
+          </button>
+        </form>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
-export function Navigation() {
-  const { isOpen, setIsOpen } = useNavStore()
-  const { data } = useSession()
-  const pathname = usePathname()
-
-  const navItems: NavItem[] = [
-    { name: "Home", href: "/" },
-    ...(data?.user ? [
-      { name: "Settings", href: "/settings" },
-      { name: "Dashboard", href: "/dashboard" },
-    ] as NavItem[] : []),
-  ]
-
-  const isActiveLink = (itemHref: string) => {
-    if (itemHref === "/") {
-      return pathname === "/"
-    }
-    return pathname === itemHref || pathname.startsWith(`${itemHref}/`)
-  }
-
+export function Header({session}: {session: Session | null}) {
   return (
-    <nav className="dark:bg-muted/30 bg-muted/60 shadow dark:shadow-xl z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="text-xl md:text-2xl font-bold text-primary flex items-center gap-2 md:gap-3">
-              <ComponentIcon className="w-6 h-6 md:w-7 md:h-7" />
-              {SITE_NAME}
-            </Link>
-          </div>
-          <div className="hidden md:flex md:items-center md:space-x-6">
-            <div className="flex items-baseline space-x-4">
-              {navItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={cn(
-                      "text-muted-foreground hover:text-foreground no-underline px-3 h-16 flex items-center text-sm font-medium transition-colors relative",
-                      isActiveLink(item.href) && "text-foreground after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-full after:bg-foreground"
-                    )}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-            </div>
-            <ActionButtons />
-            {data?.user && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="p-6"
-                onClick={() => signOut()}
-              >
-                <User className="w-9 h-9" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            )}
-          </div>
-          <div className="md:hidden flex items-center">
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="p-6">
-                  <Menu className="w-9 h-9" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[240px] sm:w-[300px]">
-                <div className="mt-6 flow-root">
-                  <div className="space-y-2">
-                    {navItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className={cn(
-                              "block px-3 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 no-underline transition-colors relative",
-                              isActiveLink(item.href) && "text-foreground"
-                            )}
-                            onClick={() => setIsOpen(false)}
-                          >
-                            {item.name}
-                          </Link>
-                    ))}
-                    <div className="px-3 pt-4">
-                      <ActionButtons />
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+    <header className="border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <Link href="/" className="flex items-center">
+          <CircleIcon className="h-6 w-6 text-orange-500" />
+          <span className="ml-2 text-xl font-semibold text-gray-900">ACME</span>
+        </Link>
+        <div className="flex items-center space-x-4">
+          <Suspense fallback={<div className="h-9" />}>
+            <UserMenu session={session} />
+          </Suspense>
         </div>
       </div>
-    </nav>
-  )
+    </header>
+  );
 }
-

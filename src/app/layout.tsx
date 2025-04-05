@@ -78,7 +78,7 @@ export default function BaseLayout({
                 {children}
               </TooltipProvider>
             </ThemeProvider>
-            <Toaster richColors closeButton position="top-right" expand duration={7000} />
+            <Toaster richColors closeButton position="top-right" expand duration={3000} />
             <CookieConsentBanner />
           </QueryProvider>
         </SessionProvider>
