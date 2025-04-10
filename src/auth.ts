@@ -4,7 +4,7 @@ import { getDB } from "@/db"
 import Credentials from "next-auth/providers/credentials"
 import { hashPassword, verifyPassword } from "./utils/password-hasher";
 import { SignInSchema } from "./schemas/signin.schema";
-import { accounts, sessions, users, verificationTokens } from "./db/schema";
+import { accounts, sessions, users, VERICATION_TYPE_ENUM, verificationTokens } from "./db/schema";
 import { eq } from 'drizzle-orm';
 import { canSignUp, generateSessionToken } from "./utils/auth";
 import { getIP } from "./utils/get-IP";
@@ -84,6 +84,7 @@ const providers: Provider[] = [
               identifier: createId(),
               token: verificationToken,
               expires: expiresAt,
+              type: VERICATION_TYPE_ENUM.EMAIL,
             });
 
           await sendVerificationEmail({

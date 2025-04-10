@@ -11,6 +11,14 @@ const ROLES_ENUM = {
 
 const roleTuple = Object.values(ROLES_ENUM) as [string, ...string[]];
 
+export const VERICATION_TYPE_ENUM = {
+  EMAIL: 'email',
+  RESET_PASSWORD: 'reset_password',
+} as const;
+
+const verificationTypeTuple = Object.values(VERICATION_TYPE_ENUM) as [string, ...string[]];
+
+
 const commonColumns = {
   id: text().primaryKey().$defaultFn(() => createId()).notNull(),
   createdAt: integer({
@@ -74,6 +82,7 @@ export const verificationTokens = sqliteTable(
     identifier: text("identifier").notNull(),
     token: text("token").notNull(),
     expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+    type: text("type", { enum: verificationTypeTuple }).notNull(),
   },
   (verificationToken) => ({
     compositePk: primaryKey({
