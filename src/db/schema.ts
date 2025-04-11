@@ -11,14 +11,6 @@ const ROLES_ENUM = {
 
 const roleTuple = Object.values(ROLES_ENUM) as [string, ...string[]];
 
-export const VERICATION_TYPE_ENUM = {
-  EMAIL: 'email',
-  RESET_PASSWORD: 'reset_password',
-} as const;
-
-const verificationTypeTuple = Object.values(VERICATION_TYPE_ENUM) as [string, ...string[]];
-
-
 const commonColumns = {
   id: text().primaryKey().$defaultFn(() => createId()).notNull(),
   createdAt: integer({
@@ -82,7 +74,6 @@ export const verificationTokens = sqliteTable(
     identifier: text("identifier").notNull(),
     token: text("token").notNull(),
     expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
-    type: text("type", { enum: verificationTypeTuple }).notNull(),
   },
   (verificationToken) => ({
     compositePk: primaryKey({
@@ -189,12 +180,34 @@ export const purchasedItemsRelations = relations(purchasedItemsTable, ({ one }) 
   }),
 }));
 
+export const passwordResetTokens = sqliteTable("password_reset_token", {
+  id: text().primaryKey().$defaultFn(() => createId()).notNull(),
+  userId: text().notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: text().notNull().unique(),
+  expires: integer({ mode: "timestamp_ms" }).notNull(),
+  createdAt: integer({
+    mode: "timestamp",
+  }).$defaultFn(() => new Date()).notNull(),
+}, (table) => ([
+  index('password_reset_token_user_id_idx').on(table.userId),
+  index('password_reset_token_token_idx').on(table.token),
+  index('password_reset_token_expires_idx').on(table.expires),
+]));
+
+export const passwordResetTokenRelations = relations(passwordResetTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [passwordResetTokens.userId],
+    references: [users.id],
+  }),
+}));
+
 export const userRelations = relations(users, ({ many }) => ({
   creditTransactions: many(creditTransactionTable),
   purchasedItems: many(purchasedItemsTable),
+  passwordResetTokens: many(passwordResetTokens),
 }));
-
 
 export type User = InferSelectModel<typeof users>;
 export type CreditTransaction = InferSelectModel<typeof creditTransactionTable>;
 export type PurchasedItem = InferSelectModel<typeof purchasedItemsTable>;
+export type PasswordResetToken = InferSelectModel<typeof passwordResetTokens>;

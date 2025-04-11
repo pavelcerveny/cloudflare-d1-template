@@ -2,7 +2,6 @@ import "server-only";
 import { eq, sql, desc, and, lt, isNull, gt, or, asc } from "drizzle-orm";
 import { getDB } from "@/db";
 import { users, creditTransactionTable, CREDIT_TRANSACTION_TYPE, purchasedItemsTable } from "@/db/schema";
-import { updateAllSessionsOfUser, KVSession } from "./kv-session";
 import { CREDIT_PACKAGES, FREE_MONTHLY_CREDITS } from "@/constants";
 
 export type CreditPackage = typeof CREDIT_PACKAGES[number];
@@ -13,7 +12,7 @@ export function getCreditPackage(packageId: string): CreditPackage | undefined {
   return CREDIT_PACKAGES.find((pkg) => pkg.id === packageId);
 }
 
-function shouldRefreshCredits(session: KVSession, currentTime: Date): boolean {
+function shouldRefreshCredits(session: any, currentTime: Date): boolean {
   // Check if it's been at least a month since last refresh
   if (!session.user.lastCreditRefreshAt) {
     return true;
@@ -81,7 +80,7 @@ export async function updateUserCredits(userId: string, creditsToAdd: number) {
     .where(eq(users.id, userId));
 
   // Update all KV sessions to reflect the new credit balance
-  await updateAllSessionsOfUser(userId);
+ //  await updateAllSessionsOfUser(userId);
 }
 
 async function updateLastRefreshDate(userId: string, date: Date) {
@@ -116,7 +115,7 @@ export async function logTransaction(
   });
 }
 
-export async function addFreeMonthlyCreditsIfNeeded(session: KVSession): Promise<number> {
+export async function addFreeMonthlyCreditsIfNeeded(session: any): Promise<number> {
   const currentTime = new Date();
 
   // Check if it's been at least a month since last refresh
@@ -257,7 +256,7 @@ export async function useCredits({ userId, amount, description }: { userId: stri
   });
 
   // Update all KV sessions to reflect the new credit balance
-  await updateAllSessionsOfUser(userId);
+  // await updateAllSessionsOfUser(userId);
 
   return updatedUser?.currentCredits ?? 0;
 }

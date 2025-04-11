@@ -3,7 +3,6 @@
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import { Suspense, useEffect } from "react"
-import { EmailVerificationDialog } from "./email-verification-dialog"
 import { useTopLoader } from 'nextjs-toploader'
 import { usePathname, useRouter, useSearchParams, useParams } from "next/navigation"
 
@@ -52,7 +51,6 @@ export function ThemeProvider({
       </Suspense>
       <NextThemesProvider {...props} attribute="class">
         {children}
-        <EmailVerificationDialog />
       </NextThemesProvider>
     </>
   )

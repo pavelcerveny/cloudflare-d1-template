@@ -52,91 +52,29 @@ export const sidebarData: SidebarData = {
       items: [
         {
           title: 'Dashboard',
-          url: '/',
+          url: '/dashboard',
           icon: LayoutDashboard,
         },
         {
-          title: 'Tasks',
-          url: '/tasks',
+          title: 'Billing',
+          url: '/dashboard/billing',
           icon: CheckSquare,
         },
         {
-          title: 'Apps',
-          url: '/apps',
+          title: 'Marketplace',
+          url: '/dashboard/marketplace',
           icon: Package,
         },
         {
           title: 'Chats',
-          url: '/chats',
+          url: '/dashboard/chats',
           badge: '3',
           icon: MessageSquare,
         },
         {
           title: 'Users',
-          url: '/users',
+          url: '/dashboard/users',
           icon: Users,
-        },
-      ],
-    },
-    {
-      title: 'Pages',
-      items: [
-        {
-          title: 'Auth',
-          icon: LockKeyhole,
-          items: [
-            {
-              title: 'Sign In',
-              url: '/sign-in',
-            },
-            {
-              title: 'Sign In (2 Col)',
-              url: '/sign-in-2',
-            },
-            {
-              title: 'Sign Up',
-              url: '/sign-up',
-            },
-            {
-              title: 'Forgot Password',
-              url: '/forgot-password',
-            },
-            {
-              title: 'OTP',
-              url: '/otp',
-            },
-          ],
-        },
-        {
-          title: 'Errors',
-          icon: Bug,
-          items: [
-            {
-              title: 'Unauthorized',
-              url: '/401',
-              icon: Lock,
-            },
-            {
-              title: 'Forbidden',
-              url: '/403',
-              icon: UserX,
-            },
-            {
-              title: 'Not Found',
-              url: '/404',
-              icon: FileWarning,
-            },
-            {
-              title: 'Internal Server Error',
-              url: '/500',
-              icon: ServerCrash,
-            },
-            {
-              title: 'Maintenance Error',
-              url: '/503',
-              icon: AlertTriangle,
-            },
-          ],
         },
       ],
     },
@@ -149,34 +87,34 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: 'Profile',
-              url: '/settings',
+              url: '/dashboard/settings',
               icon: UserCog,
             },
             {
               title: 'Account',
-              url: '/settings/account',
+              url: '/dashboard/settings/account',
               icon: Wrench,
             },
             {
               title: 'Appearance',
-              url: '/settings/appearance',
+              url: '/dashboard/settings/appearance',
               icon: Palette,
             },
             {
               title: 'Notifications',
-              url: '/settings/notifications',
+              url: '/dashboard/settings/notifications',
               icon: BellRing,
             },
             {
               title: 'Display',
-              url: '/settings/display',
+              url: '/dashboard/settings/display',
               icon: Command,
             },
           ],
         },
         {
           title: 'Help Center',
-          url: '/help-center',
+          url: '/dashboard/help-center',
           icon: HelpCircle,
         },
       ],

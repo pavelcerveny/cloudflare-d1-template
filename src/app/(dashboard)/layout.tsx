@@ -6,7 +6,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 
 import { cn } from "@/lib/utils"
-import SkipToMain from "@/components/skip-to-main"
+import SkipToMain from "@/components/admin/skip-to-main"
 import { AppSidebar } from "@/components/admin/layout/app-sidebar"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {

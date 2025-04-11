@@ -3,52 +3,12 @@ import { users } from "@/db/schema";
 import { init } from "@paralleldrive/cuid2";
 import { encodeHexLowerCase } from "@oslojs/encoding"
 import { sha256 } from "@oslojs/crypto/sha2"
-import ms from "ms"
 import { getDB } from "@/db";
 import { eq } from "drizzle-orm";
 import isProd from "@/utils/is-prod";
-import {
-  createKVSession,
-  deleteKVSession,
-  type KVSession,
-  type CreateKVSessionParams,
-  getKVSession,
-  updateKVSession,
-  CURRENT_SESSION_VERSION
-} from "./kv-session";
-import { cache } from "react"
-import type { SessionValidationResult } from "@/types";
+
 import { ZSAError } from "zsa";
-import { addFreeMonthlyCreditsIfNeeded } from "./credits";
-import { DAY_IN_MILLISECONDS } from "@/time-constants";
-
-const getSessionLength = () => {
-  return 30 * DAY_IN_MILLISECONDS;
-}
-
-/**
- * This file is based on https://lucia-auth.com
- */
-
-export async function getUserFromDB(userId: string) {
-  const db = await getDB();
-  return await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    columns: {
-      id: true,
-      email: true,
-      // firstName: true,
-      // lastName: true,
-      role: true,
-      emailVerified: true,
-      // avatar: true,
-      // createdAt: true,
-      // updatedAt: true,
-      currentCredits: true,
-      lastCreditRefreshAt: true,
-    },
-  });
-}
+import { Session, User } from "next-auth";
 
 const createId = init({
   length: 32,
@@ -58,162 +18,28 @@ export function generateSessionToken(): string {
   return createId();
 }
 
-function encodeSessionCookie(userId: string, token: string): string {
-  return `${userId}:${token}`;
+export interface CurrentSession extends Session {
+  user?: {
+    id?: string
+    name?: string | null
+    email?: string | null
+    emailVerified?: boolean
+  },  
+  expires: string
 }
-
-function decodeSessionCookie(cookie: string): { userId: string; token: string } | null {
-  const parts = cookie.split(':');
-  if (parts.length !== 2) return null;
-  return { userId: parts[0], token: parts[1] };
-}
-
-interface CreateSessionParams extends Pick<CreateKVSessionParams, "authenticationType" | "passkeyCredentialId" | "userId"> {
-  token: string;
-}
-
-export async function createSession({
-  token,
-  userId,
-  authenticationType,
-  passkeyCredentialId
-}: CreateSessionParams): Promise<KVSession> {
-  const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-  const expiresAt = new Date(Date.now() + getSessionLength());
-
-  const user = await getUserFromDB(userId);
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  return createKVSession({
-    sessionId,
-    userId,
-    expiresAt,
-    user,
-    authenticationType,
-    passkeyCredentialId
-  });
-}
-
-export async function createAndStoreSession(
-  userId: string,
-  authenticationType?: CreateKVSessionParams["authenticationType"],
-  passkeyCredentialId?: CreateKVSessionParams["passkeyCredentialId"]
-) {
-  const sessionToken = generateSessionToken();
-  const session = await createSession({
-    token: sessionToken,
-    userId,
-    authenticationType,
-    passkeyCredentialId
-  });
-  await setSessionTokenCookie({
-    token: sessionToken,
-    userId,
-    expiresAt: new Date(session.expiresAt)
-  });
-}
-
-async function validateSessionToken(token: string, userId: string): Promise<SessionValidationResult | null> {
-  const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-
-  const session = await getKVSession(sessionId, userId);
-
-  if (!session) return null;
-
-  // If the session has expired, delete it and return null
-  if (Date.now() >= session.expiresAt) {
-    await deleteKVSession(sessionId, userId);
-    return null;
-  }
-
-  // Check if session version needs to be updated
-  if (!session.version || session.version !== CURRENT_SESSION_VERSION) {
-    const updatedSession = await updateKVSession(sessionId, userId, new Date(session.expiresAt));
-
-    if (!updatedSession) {
-      return null;
-    }
-
-    return updatedSession;
-  }
-
-  // Check and refresh credits if needed
-  const currentCredits = await addFreeMonthlyCreditsIfNeeded(session);
-
-  // If credits were refreshed, update the session
-  if (
-    session?.user?.currentCredits &&
-    currentCredits !== session.user.currentCredits
-  ) {
-    session.user.currentCredits = currentCredits;
-  }
-
-  // Return the user data directly from the session
-  return session;
-}
-
-export async function invalidateSession(sessionId: string, userId: string): Promise<void> {
-  await deleteKVSession(sessionId, userId);
-}
-
-interface SetSessionTokenCookieParams {
-  token: string;
-  userId: string;
-  expiresAt: Date;
-}
-
-export async function setSessionTokenCookie({ token, userId, expiresAt }: SetSessionTokenCookieParams): Promise<void> {
-  // const cookieStore = await cookies();
-  // cookieStore.set(SESSION_COOKIE_NAME, encodeSessionCookie(userId, token), {
-  //   httpOnly: true,
-  //   sameSite: isProd ? "strict" : "lax",
-  //   secure: isProd,
-  //   expires: expiresAt,
-  //   path: "/",
-  // });
-}
-
-export async function deleteSessionTokenCookie(): Promise<void> {
-  // const cookieStore = await cookies();
-  // cookieStore.delete(SESSION_COOKIE_NAME);
-}
-
-/**
- * This function can only be called in a Server Components, Server Action or Route Handler
- */
-export const getSessionFromCookie = cache(async (): Promise<SessionValidationResult | null> => {
-  // const cookieStore = await cookies();
-  // const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-  // if (!sessionCookie) {
-  //   return null;
-  // }
-
-  // const decoded = decodeSessionCookie(sessionCookie);
-
-  // if (!decoded || !decoded.token || !decoded.userId) {
-  //   return null;
-  // }
-
-  // return validateSessionToken(decoded.token, decoded.userId);
-})
 
 /**
  * Helper function to require a verified email for protected actions
  * @throws {ZSAError} If user is not authenticated or email is not verified
  * @returns The verified session
  */
-export async function requireVerifiedEmail() {
-  const session = await getSessionFromCookie();
+export async function requireVerifiedEmail(session: CurrentSession) {
 
   if (!session) {
     throw new ZSAError("NOT_AUTHORIZED", "Not authenticated");
   }
 
-  if (!session.user.emailVerified) {
+  if (!session.user?.emailVerified) {
     throw new ZSAError("FORBIDDEN", "Please verify your email first");
   }
 
