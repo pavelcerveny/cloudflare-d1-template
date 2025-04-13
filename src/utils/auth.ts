@@ -16,11 +16,13 @@ export function generateSessionToken(): string {
 export interface CurrentSession extends Session {
   user?: {
     id?: string
-    name?: string | null
+    firstName?: string | null
+    lastName?: string | null
     email?: string | null
-    emailVerified?: boolean
+    emailVerified?: Date | null;
     lastCreditRefreshAt?: Date | null;
     currentCredits?: number;
+    role?: string;
   },  
   expires: string
 }

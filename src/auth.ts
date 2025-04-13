@@ -4,9 +4,9 @@ import { getDB } from "@/db"
 import Credentials from "next-auth/providers/credentials"
 import { hashPassword, verifyPassword } from "./utils/password-hasher";
 import { SignInSchema } from "./schemas/signin.schema";
-import { accounts, sessions, users, verificationTokens } from "./db/schema";
+import { accounts, sessions, User, users, verificationTokens } from "./db/schema";
 import { eq } from 'drizzle-orm';
-import { canSignUp, generateSessionToken } from "./utils/auth";
+import { canSignUp, CurrentSession, generateSessionToken } from "./utils/auth";
 import { getIP } from "./utils/get-IP";
 import { sendVerificationEmail } from "./utils/email";
 import { createId } from "@paralleldrive/cuid2";
@@ -143,6 +143,24 @@ const authResult = async () => {
           }
   
           return token;
+        },
+        async session({ session, user }) {
+          const sessionUser = user as User;
+          const currentSession: CurrentSession = {
+            ...session,
+            user: {
+              id: sessionUser.id,
+              firstName: sessionUser.firstName,
+              lastName: sessionUser.lastName,
+              email: sessionUser.email,
+              emailVerified: sessionUser.emailVerified,
+              lastCreditRefreshAt: sessionUser.lastCreditRefreshAt,
+              currentCredits: sessionUser.currentCredits,
+              role: sessionUser.role
+            },  
+          }
+
+          return currentSession;
         },
       },
       jwt: {
