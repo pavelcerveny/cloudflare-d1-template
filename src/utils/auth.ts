@@ -1,14 +1,9 @@
 
-import { users } from "@/db/schema";
 import { init } from "@paralleldrive/cuid2";
-import { encodeHexLowerCase } from "@oslojs/encoding"
-import { sha256 } from "@oslojs/crypto/sha2"
-import { getDB } from "@/db";
-import { eq } from "drizzle-orm";
 import isProd from "@/utils/is-prod";
 
 import { ZSAError } from "zsa";
-import { Session, User } from "next-auth";
+import { Session } from "next-auth";
 
 const createId = init({
   length: 32,
@@ -24,6 +19,8 @@ export interface CurrentSession extends Session {
     name?: string | null
     email?: string | null
     emailVerified?: boolean
+    lastCreditRefreshAt?: Date | null;
+    currentCredits?: number;
   },  
   expires: string
 }

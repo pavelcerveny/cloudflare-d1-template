@@ -1,7 +1,6 @@
 "use server";
 
 import { createServerAction, ZSAError } from "zsa";
-import { createId } from "@paralleldrive/cuid2";
 import { sendVerificationEmail } from "@/utils/email";
 import { withRateLimit, RATE_LIMITS } from "@/utils/with-rate-limit";
 import { EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS } from "@/constants";

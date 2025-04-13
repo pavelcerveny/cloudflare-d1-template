@@ -3,6 +3,7 @@ import { eq, sql, desc, and, lt, isNull, gt, or, asc } from "drizzle-orm";
 import { getDB } from "@/db";
 import { users, creditTransactionTable, CREDIT_TRANSACTION_TYPE, purchasedItemsTable } from "@/db/schema";
 import { CREDIT_PACKAGES, FREE_MONTHLY_CREDITS } from "@/constants";
+import { CurrentSession } from "./auth";
 
 export type CreditPackage = typeof CREDIT_PACKAGES[number];
 
@@ -12,9 +13,9 @@ export function getCreditPackage(packageId: string): CreditPackage | undefined {
   return CREDIT_PACKAGES.find((pkg) => pkg.id === packageId);
 }
 
-function shouldRefreshCredits(session: any, currentTime: Date): boolean {
+function shouldRefreshCredits(session: CurrentSession, currentTime: Date): boolean {
   // Check if it's been at least a month since last refresh
-  if (!session.user.lastCreditRefreshAt) {
+  if (!session.user?.lastCreditRefreshAt) {
     return true;
   }
 
@@ -115,7 +116,7 @@ export async function logTransaction(
   });
 }
 
-export async function addFreeMonthlyCreditsIfNeeded(session: any): Promise<number> {
+export async function addFreeMonthlyCreditsIfNeeded(session: CurrentSession): Promise<number> {
   const currentTime = new Date();
 
   // Check if it's been at least a month since last refresh
@@ -123,7 +124,7 @@ export async function addFreeMonthlyCreditsIfNeeded(session: any): Promise<numbe
     // Double check the last refresh date from the database to prevent race conditions
     const db = await getDB();
     const user = await db.query.users.findFirst({
-      where: eq(users.id, session.userId),
+      where: eq(users.id, session.user?.id ?? ""),
       columns: {
         lastCreditRefreshAt: true,
         currentCredits: true,
@@ -136,15 +137,15 @@ export async function addFreeMonthlyCreditsIfNeeded(session: any): Promise<numbe
     }
 
     // Process any expired credits first
-    await processExpiredCredits(session.userId, currentTime);
+    await processExpiredCredits(session.user?.id ?? "", currentTime);
 
     // Add free monthly credits with 1 month expiration
     const expirationDate = new Date(currentTime);
     expirationDate.setMonth(expirationDate.getMonth() + 1);
 
-    await updateUserCredits(session.userId, FREE_MONTHLY_CREDITS);
+    await updateUserCredits(session.user?.id ?? "", FREE_MONTHLY_CREDITS);
     await logTransaction(
-      session.userId,
+      session.user?.id ?? "",
       FREE_MONTHLY_CREDITS,
       'Free monthly credits',
       CREDIT_TRANSACTION_TYPE.MONTHLY_REFRESH,
@@ -152,11 +153,11 @@ export async function addFreeMonthlyCreditsIfNeeded(session: any): Promise<numbe
     );
 
     // Update last refresh date
-    await updateLastRefreshDate(session.userId, currentTime);
+    await updateLastRefreshDate(session.user?.id ?? "", currentTime);
 
     // Get the updated credit balance from the database
     const updatedUser = await db.query.users.findFirst({
-      where: eq(users.id, session.userId),
+      where: eq(users.id, session.user?.id ?? ""),
       columns: {
         currentCredits: true,
       },
@@ -165,7 +166,7 @@ export async function addFreeMonthlyCreditsIfNeeded(session: any): Promise<numbe
     return updatedUser?.currentCredits ?? 0;
   }
 
-  return session.user.currentCredits;
+  return session.user?.currentCredits ?? 0;
 }
 
 export async function hasEnoughCredits({ userId, requiredCredits }: { userId: string; requiredCredits: number }) {

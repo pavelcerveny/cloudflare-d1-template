@@ -13,10 +13,10 @@ export const metadata: Metadata = {
 const VerifyEmailPage = async ({
   searchParams,
 }: {
-  searchParams: { token?: string };
+  searchParams: Promise<{ token?: string }>
 }) => {
   const session = await auth();
-  const token = searchParams.token;
+  const token = (await searchParams).token;
 
   if (!session?.user) {
     return (

@@ -158,8 +158,6 @@ async function sendNodemailerEmail({
   replyTo: originalReplyTo,
   htmlContent,
   textContent,
-  params,
-  tags,
 }: NodemailerEmailOptions) {
   if (!isProd) {
     return;

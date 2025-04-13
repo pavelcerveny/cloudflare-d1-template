@@ -1,6 +1,6 @@
 'use server';
 
-import { requireVerifiedEmail } from "@/utils/auth";
+import { CurrentSession, requireVerifiedEmail } from "@/utils/auth";
 import {
   getCreditTransactions,
   updateUserCredits,
@@ -12,6 +12,7 @@ import { getStripe } from "@/lib/stripe";
 import { MAX_TRANSACTIONS_PER_PAGE, CREDITS_EXPIRATION_YEARS } from "@/constants";
 import { withRateLimit, RATE_LIMITS } from "@/utils/with-rate-limit";
 import { YEAR_IN_MILLISECONDS } from "@/time-constants";
+import { auth } from "@/auth";
 
 // Action types
 type GetTransactionsInput = {
@@ -29,6 +30,8 @@ type PurchaseCreditsInput = {
 };
 
 export async function getTransactions({ page, limit = MAX_TRANSACTIONS_PER_PAGE }: GetTransactionsInput) {
+  const userSession = await auth();
+
   return withRateLimit(async () => {
     if (page < 1 || limit < 1) {
       throw new Error("Invalid page or limit");
@@ -42,10 +45,10 @@ export async function getTransactions({ page, limit = MAX_TRANSACTIONS_PER_PAGE 
       limit = MAX_TRANSACTIONS_PER_PAGE;
     }
 
-    const session = await requireVerifiedEmail();
+    const session = await requireVerifiedEmail(userSession as CurrentSession);
 
     const result = await getCreditTransactions({
-      userId: session.user.id,
+      userId: session.user?.id ?? "",
       page,
       limit,
     });
@@ -62,8 +65,10 @@ export async function getTransactions({ page, limit = MAX_TRANSACTIONS_PER_PAGE 
 }
 
 export async function createPaymentIntent({ packageId }: CreatePaymentIntentInput) {
+  const userSession = await auth();
+
   return withRateLimit(async () => {
-    const session = await requireVerifiedEmail();
+    const session = await requireVerifiedEmail(userSession as CurrentSession);
     if (!session) {
       throw new Error("Unauthorized");
     }
@@ -82,7 +87,7 @@ export async function createPaymentIntent({ packageId }: CreatePaymentIntentInpu
           allow_redirects: 'never',
         },
         metadata: {
-          userId: session.user.id,
+          userId: session.user?.id ?? "",
           packageId: creditPackage.id,
           credits: creditPackage.credits.toString(),
         },
@@ -97,8 +102,10 @@ export async function createPaymentIntent({ packageId }: CreatePaymentIntentInpu
 }
 
 export async function confirmPayment({ packageId, paymentIntentId }: PurchaseCreditsInput) {
+  const userSession = await auth();
+
   return withRateLimit(async () => {
-    const session = await requireVerifiedEmail();
+    const session = await requireVerifiedEmail(userSession as CurrentSession);
     if (!session) {
       throw new Error("Unauthorized");
     }
@@ -118,7 +125,7 @@ export async function confirmPayment({ packageId, paymentIntentId }: PurchaseCre
 
       // Verify the payment intent metadata matches
       if (
-        paymentIntent.metadata.userId !== session.user.id ||
+        paymentIntent.metadata.userId !== session.user?.id ||
         paymentIntent.metadata.packageId !== packageId ||
         parseInt(paymentIntent.metadata.credits) !== creditPackage.credits
       ) {

@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import type { ComponentProps } from 'react';
 import { FormMessage } from './ui/form';
-import { useConfigStore } from '@/state/config';
+import { CAPTCHA_ENABLED } from '@/featureFlags';
 
 const Turnstile = dynamic(() => import('@marsidev/react-turnstile').then(mod => mod.Turnstile), {
   ssr: false,
@@ -17,10 +17,9 @@ export const Captcha = ({
   validationError,
   ...props
 }: Props) => {
-  const { isTurnstileEnabled } = useConfigStore()
 
   return (
-    isTurnstileEnabled ? (
+    CAPTCHA_ENABLED ? (
       <>
         <Turnstile
           options={{

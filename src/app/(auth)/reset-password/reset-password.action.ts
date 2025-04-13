@@ -20,7 +20,7 @@ export const resetPasswordAction = createServerAction()
 
         try {
           // Hash the input token with SHA-256 to compare with stored hash
-          const hashedInputToken = crypto.createHash('sha256').update(input.token).digest('hex');
+          const hashedInputToken = crypto.createHash('sha256').update(token).digest('hex');
           
           // Find valid reset token
           const resetToken = await db.query.passwordResetTokens.findFirst({

@@ -51,7 +51,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
         )}
         {...props}
       >
-        {links.map(({ title, href, isActive, disabled }) => (
+        {links.map(({ title, href, isActive }) => (
           <Link
             key={`${title}-${href}`}
             href={href}

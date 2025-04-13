@@ -95,6 +95,7 @@ const SignUpPage = ({providerMap}: SignUpPageProps) => {
         {Object.values(providerMap).map((provider) => (
           <form
             action={() => onSubmitProvider(provider.id)}
+            key={provider.id}
           >
             <button type="submit">
               <span>Sign in with {provider.name}</span>

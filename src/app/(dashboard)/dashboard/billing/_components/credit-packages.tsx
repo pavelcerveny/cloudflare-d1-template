@@ -8,13 +8,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { StripePaymentForm } from "./stripe-payment-form";
 import { createPaymentIntent } from "@/actions/credits.action";
 import { Coins, Sparkles, Zap } from "lucide-react";
-import { useSessionStore } from "@/state/session";
-import { useTransactionStore } from "@/state/transaction";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { CurrentSession } from "@/utils/auth";
 type CreditPackage = typeof CREDIT_PACKAGES[number];
 
 export const getPackageIcon = (index: number) => {
@@ -37,9 +37,8 @@ export function CreditPackages() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const session = useSessionStore((state) => state);
-  const transactionsRefresh = useTransactionStore((state) => state.triggerRefresh);
-  const sessionIsLoading = session?.isLoading;
+
+  const {data, status} = useSession();
 
   const handlePurchase = async (pkg: CreditPackage) => {
     try {
@@ -59,7 +58,6 @@ export function CreditPackages() {
     setSelectedPackage(null);
     setClientSecret(null);
     router.refresh();
-    transactionsRefresh();
   };
 
   return (
@@ -71,14 +69,14 @@ export function CreditPackages() {
         <CardContent className="space-y-8">
           <div className="space-y-2">
             <div className="flex items-baseline gap-2">
-              {sessionIsLoading ? (
+              {status === "loading" ? (
                 <>
                   <Skeleton className="h-9 w-16" />
                   <Skeleton className="h-9 w-24" />
                 </>
               ) : (
                 <div className="text-3xl font-bold">
-                  {session?.session?.user?.currentCredits.toLocaleString()} credits
+                  {(data as CurrentSession)?.user?.currentCredits?.toLocaleString()} credits
                 </div>
               )}
             </div>

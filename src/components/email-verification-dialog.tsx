@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useSessionStore } from "@/state/session";
 import { useServerAction } from "zsa-react";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -19,6 +18,8 @@ import { usePathname } from "next/navigation";
 import { Route } from "next";
 import { resendVerificationAction } from "@/actions/resend-verification.action";
 import { AlertCircle } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { CurrentSession } from "@/utils/auth";
 
 const pagesToBypass: Route[] = [
   "/verify-email",
@@ -32,7 +33,7 @@ const pagesToBypass: Route[] = [
 ];
 
 export function EmailVerificationDialog() {
-  const { session } = useSessionStore();
+  const { data: session } = useSession();
   const [lastResendTime, setLastResendTime] = useState<number | null>(null);
   const pathname = usePathname();
 
@@ -55,7 +56,7 @@ export function EmailVerificationDialog() {
   // or if we're on the verify-email page
   if (
     !session
-    || session.user.emailVerified
+    || (session as CurrentSession).user?.emailVerified
     || pagesToBypass.includes(pathname as Route)
   ) {
     return null;
@@ -74,7 +75,7 @@ export function EmailVerificationDialog() {
         <DialogHeader>
           <DialogTitle>Verify your email</DialogTitle>
           <DialogDescription>
-            Please verify your email address to access all features. We sent a verification link to {session.user.email}.
+            Please verify your email address to access all features. We sent a verification link to {(session as CurrentSession).user?.email}.
             The verification link will expire in {Math.floor(EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS / 3600)} hours.
 
             {!isProd && (

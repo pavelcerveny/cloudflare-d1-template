@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { useTransactionStore } from "@/state/transaction";
 
 type TransactionData = Awaited<ReturnType<typeof getTransactions>>
 
@@ -28,7 +27,6 @@ export function TransactionHistory() {
   const [data, setData] = useState<TransactionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const refreshTrigger = useTransactionStore((state) => state.refreshTrigger);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -44,7 +42,7 @@ export function TransactionHistory() {
     };
 
     fetchTransactions();
-  }, [page, refreshTrigger]);
+  }, [page]);
 
   if (isLoading) {
     return (
